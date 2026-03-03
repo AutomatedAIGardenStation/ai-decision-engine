@@ -1,0 +1,12 @@
+# Mapping from decision action to serial command sent to Arduino/simulation.
+# Values are strings; protocol details TBD in project-info Integration doc.
+# Adjust when the real Serial protocol is defined.
+
+water: "W1"
+feed: "F1"
+pollinate: "P1"
+harvest: "H1"
+adjust_light: "L1"
+notify_user: "N1"
+no_action: "NOP"
+move_to_zone: "M1"

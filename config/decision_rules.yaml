@@ -1,0 +1,13 @@
+# Optional override rules evaluated before the decision tree.
+# Each rule: conditions (feature, operator, value) and resulting action.
+# First matching rule wins; if none match, the tree is used.
+# Operators: lt, le, eq, ne, ge, gt (for numeric); in, not_in (for categorical).
+
+rules: []
+# Example (uncomment and adjust when needed):
+# - name: low_confidence_fallback
+#   conditions:
+#     - feature: confidence
+#       operator: lt
+#       value: 0.5
+#   action: notify_user

@@ -1,4 +1,4 @@
-# Python
+# Python 3.10 (ai-decision-engine)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,16 +8,30 @@ __pycache__/
 .venv/
 .conda/
 *.egg-info/
+*.egg
 dist/
 build/
+eggs/
+
+# Testing & quality (pytest, mypy, ruff)
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.cover
+coverage.xml
+
+# Trained/serialized models (keep metadata and structure)
+models/*.pkl
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Trained models (keep metadata and structure)
-models/*.pkl

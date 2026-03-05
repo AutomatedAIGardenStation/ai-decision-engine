@@ -32,7 +32,11 @@ def get_valid_state_snapshot_data():
                 "ec_target": 1.6,
                 "ph_min": 5.5,
                 "ph_max": 6.5,
-                "pollination_window": "08:00-12:00"
+                "pollination_window": {
+                    "start_hour": 8,
+                    "end_hour": 12,
+                    "interval_days": 2
+                }
             }
         ],
         "queue_state": {

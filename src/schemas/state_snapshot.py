@@ -18,6 +18,12 @@ class MLResult(BaseModel):
     disease: Optional[str] = Field(None, description="Detected disease classification, if any")
     confidence: float = Field(..., description="Confidence score of the ML prediction (0.0 to 1.0)")
 
+class PollinationWindow(BaseModel):
+    """Configuration for a plant's pollination window."""
+    start_hour: int = Field(..., description="Start hour of the pollination window (0-23)")
+    end_hour: int = Field(..., description="End hour of the pollination window (0-23)")
+    interval_days: int = Field(..., description="Minimum days between pollinations")
+
 class PlantProfile(BaseModel):
     """Target environment and configuration for a specific plant species/profile."""
     id: int = Field(..., description="Unique identifier for the plant profile")
@@ -27,7 +33,7 @@ class PlantProfile(BaseModel):
     ec_target: float = Field(..., description="Target electrical conductivity in mS/cm")
     ph_min: float = Field(..., description="Minimum acceptable pH level")
     ph_max: float = Field(..., description="Maximum acceptable pH level")
-    pollination_window: str = Field(..., description="Time window for pollination (e.g., '10:00-14:00')")
+    pollination_window: Optional[PollinationWindow] = Field(None, description="Time window and interval for pollination")
 
 class LightPeriod(BaseModel):
     """A time period when grow lights are active."""

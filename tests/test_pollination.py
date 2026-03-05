@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime, timedelta, timezone
 from src.schemas.state_snapshot import StateSnapshot
 from src.evaluators.pollination import PollinationEvaluator

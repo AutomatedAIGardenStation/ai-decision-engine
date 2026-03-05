@@ -2,7 +2,6 @@
 Send a command string to Arduino (or simulation) over serial, TCP socket, or file.
 """
 from pathlib import Path
-from typing import Any
 
 # Optional serial; avoid hard dependency at import if pyserial missing.
 try:

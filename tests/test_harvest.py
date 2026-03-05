@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime, timezone
 from src.schemas.state_snapshot import StateSnapshot
 from src.evaluators.harvest import HarvestEvaluator

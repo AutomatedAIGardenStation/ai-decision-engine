@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime, timezone
 from typing import List
 from src.schemas.state_snapshot import StateSnapshot

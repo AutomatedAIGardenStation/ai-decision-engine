@@ -57,6 +57,9 @@ def test_state_snapshot_valid():
     assert snapshot.sensor_readings.temp == 24.5
     assert snapshot.ml_results[0].plant_id == 1
     assert snapshot.timestamp.tzinfo is not None  # Verify timezone awareness
+    assert snapshot.system_config.temp_min == 18.0
+    assert snapshot.system_config.temp_max == 30.0
+    assert snapshot.system_config.light_schedule == []
 
 def test_state_snapshot_missing_sensor_readings():
     data = get_valid_state_snapshot_data()

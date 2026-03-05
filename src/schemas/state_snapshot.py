@@ -29,6 +29,12 @@ class PlantProfile(BaseModel):
     ph_max: float = Field(..., description="Maximum acceptable pH level")
     pollination_window: str = Field(..., description="Time window for pollination (e.g., '10:00-14:00')")
 
+class LightPeriod(BaseModel):
+    """A time period when grow lights are active."""
+    start_hour: int = Field(..., description="Start hour of the light period (0-23)")
+    end_hour: int = Field(..., description="End hour of the light period (0-23)")
+    intensity_pct: int = Field(..., description="Light intensity percentage (0-100)")
+
 class QueueState(BaseModel):
     """Current state of pending operations."""
     harvest_pending_ids: List[int] = Field(..., description="List of plant IDs pending harvest")
@@ -39,6 +45,9 @@ class SystemConfig(BaseModel):
     maintenance_mode: bool = Field(..., description="Whether the system is in maintenance mode")
     zone_count: int = Field(..., description="Number of independent control zones")
     max_pump_time_s: int = Field(..., description="Maximum allowed pump run time in seconds")
+    temp_min: float = Field(18.0, description="Minimum allowed temperature")
+    temp_max: float = Field(30.0, description="Maximum allowed temperature")
+    light_schedule: List[LightPeriod] = Field(default_factory=list, description="Schedule for the lighting system")
 
 class History(BaseModel):
     """Historical operation records."""

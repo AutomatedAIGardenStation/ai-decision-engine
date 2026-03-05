@@ -2,12 +2,16 @@ from fastapi import APIRouter
 from src.schemas.state_snapshot import StateSnapshot
 from src.schemas.action_list import ActionList, DecisionMetadata
 from src.evaluators.watering import WateringEvaluator
+from src.evaluators.climate import ClimateEvaluator
+from src.evaluators.lighting import LightingEvaluator
 
 router = APIRouter()
 
 @router.post("/decide", response_model=ActionList)
 def decide(state: StateSnapshot):
     actions = WateringEvaluator.evaluate(state)
+    actions.extend(ClimateEvaluator.evaluate(state))
+    actions.extend(LightingEvaluator.evaluate(state))
 
     return ActionList(
         actions=actions,

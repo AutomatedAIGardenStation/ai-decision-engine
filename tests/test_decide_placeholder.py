@@ -51,12 +51,32 @@ def test_decide_placeholder():
 
     response = client.post("/decide", json=valid_payload)
     assert response.status_code == 200
-    assert response.json() == {
-        "actions": [],
-        "metadata": {
-            "engine_version": "0.1.0",
-            "decision_time_ms": 0
-        }
+
+    response_json = response.json()
+    assert "metadata" in response_json
+    assert response_json["metadata"] == {
+        "engine_version": "0.1.0",
+        "decision_time_ms": 0
+    }
+
+    # Assert that Climate and Lighting actions are present (based on defaults)
+    actions = response_json["actions"]
+    assert len(actions) == 2
+
+    # 24.5 is in range [18.0, 30.0], proportional cooling: pct = ((24.5 - 18.0) / 12.0) * 80 = 43.33 -> 43
+    assert actions[0] == {
+        "action": "fan_set",
+        "parameters": {"pct": 43},
+        "priority": "medium",
+        "reason": "proportional cooling"
+    }
+
+    # No light schedule provided -> outside schedule -> pct 0
+    assert actions[1] == {
+        "action": "light_set",
+        "parameters": {"pct": 0},
+        "priority": "low",
+        "reason": "outside light schedule"
     }
 
 def test_decide_missing_sensor_readings():

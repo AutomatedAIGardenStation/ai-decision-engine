@@ -37,7 +37,8 @@ def get_valid_state_snapshot_data():
         ],
         "queue_state": {
             "harvest_pending_ids": [1],
-            "active_harvest_id": None
+            "active_harvest_id": None,
+            "active_waterings": [0]
         },
         "system_config": {
             "maintenance_mode": False,

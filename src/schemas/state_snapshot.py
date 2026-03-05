@@ -33,6 +33,7 @@ class QueueState(BaseModel):
     """Current state of pending operations."""
     harvest_pending_ids: List[int] = Field(..., description="List of plant IDs pending harvest")
     active_harvest_id: Optional[int] = Field(None, description="Plant ID currently being harvested")
+    active_waterings: List[int] = Field(default_factory=list, description="List of zone IDs currently being watered")
 
 class SystemConfig(BaseModel):
     """Global system configuration and operational parameters."""

@@ -9,8 +9,11 @@ def create_base_snapshot(
     zone_count: int = 1,
     soil_moisture: list[float] = [50.0],
     moisture_target: float = 50.0,
-    last_watering_time_diff: timedelta = None
+    last_watering_time_diff: timedelta = None,
+    active_waterings: list[int] = None
 ) -> dict:
+    if active_waterings is None:
+        active_waterings = []
 
     timestamp = datetime.now(timezone.utc)
 
@@ -44,7 +47,8 @@ def create_base_snapshot(
         "plant_profiles": plant_profiles,
         "queue_state": {
             "harvest_pending_ids": [],
-            "active_harvest_id": None
+            "active_harvest_id": None,
+            "active_waterings": active_waterings
         },
         "system_config": {
             "maintenance_mode": maintenance_mode,
@@ -76,12 +80,19 @@ def test_below_threshold_water():
 
 def test_above_threshold_stop():
     # target 50, 1.1 * 50 = 55.0. Moisture is 60.0.
-    data = create_base_snapshot(soil_moisture=[60.0], moisture_target=50.0)
+    data = create_base_snapshot(soil_moisture=[60.0], moisture_target=50.0, active_waterings=[0])
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1
     assert actions[0].action == "stop_watering"
     assert actions[0].parameters["zone"] == 0
+
+def test_above_threshold_not_active_no_action():
+    # target 50, 1.1 * 50 = 55.0. Moisture is 60.0, but pump not active
+    data = create_base_snapshot(soil_moisture=[60.0], moisture_target=50.0, active_waterings=[])
+    snapshot = StateSnapshot(**data)
+    actions = WateringEvaluator.evaluate(snapshot)
+    assert len(actions) == 0
 
 def test_cooldown_active_no_action():
     # target 50, moisture 40 (< 42.5), but watered 15 mins ago
@@ -101,7 +112,7 @@ def test_cooldown_active_critical_alert():
     assert actions[0].parameters["zone"] == 0
 
 def test_multiple_zones():
-    data = create_base_snapshot(zone_count=2, soil_moisture=[40.0, 60.0], moisture_target=50.0)
+    data = create_base_snapshot(zone_count=2, soil_moisture=[40.0, 60.0], moisture_target=50.0, active_waterings=[1])
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 2

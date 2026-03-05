@@ -51,7 +51,7 @@ class WateringEvaluator:
                         priority="high"
                     )
                 )
-            elif moisture > target * 1.1:
+            elif moisture > target * 1.1 and zone in snapshot.queue_state.active_waterings:
                 actions.append(
                     Action(
                         action="stop_watering",

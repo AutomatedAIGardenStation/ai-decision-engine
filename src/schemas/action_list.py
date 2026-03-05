@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal, Union
+from typing import List, Literal
 from pydantic import BaseModel, Field
 
 class Action(BaseModel):

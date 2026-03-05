@@ -5,7 +5,7 @@ from pathlib import Path
 # Add project root so "src" is importable.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.decision.features import recognition_to_features, FEATURE_NAMES
+from src.decision.features import recognition_to_features, FEATURE_NAMES, _ripeness_str_to_float
 
 
 def test_feature_vector_length() -> None:
@@ -47,3 +47,34 @@ def test_from_fixture_file() -> None:
     assert vec[0] >= 0
     assert 0 <= vec[1] <= 1
     assert 0 <= vec[2] <= 1
+
+def test_ripeness_str_mapping() -> None:
+    assert _ripeness_str_to_float("unripe") == 0.25
+    assert _ripeness_str_to_float("green") == 0.25
+    assert _ripeness_str_to_float("ripe") == 0.75
+    assert _ripeness_str_to_float("ready") == 0.75
+    assert _ripeness_str_to_float("overripe") == 1.0
+    assert _ripeness_str_to_float("over") == 1.0
+    assert _ripeness_str_to_float("0.5") == 0.5
+    assert _ripeness_str_to_float("invalid") == 0.5 # RIPENESS_DEFAULT
+    assert _ripeness_str_to_float("") == 0.5
+
+def test_recognition_to_features_invalid_ripeness_type() -> None:
+    data = {
+        "species": "tomato",
+        "ripeness": [], # Invalid type
+        "confidence": 0.8
+    }
+    features = recognition_to_features(data)
+    # species: 0.0, ripeness defaults to 0.5, confidence 0.8
+    assert features == [0.0, 0.5, 0.8]
+
+def test_recognition_to_features_str_ripeness() -> None:
+    data = {
+        "species": "pepper",
+        "ripeness": "green",
+        "confidence": 0.5
+    }
+    features = recognition_to_features(data)
+    # species: 2.0 (pepper), ripeness 0.25, confidence 0.5
+    assert features == [2.0, 0.25, 0.5]

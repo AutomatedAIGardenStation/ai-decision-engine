@@ -29,6 +29,8 @@ def load_rules(config_dir: Path | None = None) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        return []
     return data.get("rules", [])
 
 

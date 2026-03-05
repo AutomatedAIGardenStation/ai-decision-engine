@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta, timezone
-import pytest
 from src.schemas.state_snapshot import StateSnapshot
-from src.schemas.action_list import Action
 from src.evaluators.watering import WateringEvaluator
 
 def create_base_snapshot(

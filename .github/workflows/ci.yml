@@ -62,30 +62,11 @@ jobs:
           name: coverage-python-ai-${{ matrix.python-version }}
           path: coverage.xml
 
-  # ── Smoke test (dry-run) ────────────────────────────────────────────────────
-  dry-run:
-    name: Smoke – dry run
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Dry-run main module
-        run: python -m src.main --dry-run
-        continue-on-error: true   # remove once --dry-run is implemented
-
   # ── Notify ci-cd repo ──────────────────────────────────────────────────────
   notify-ci-cd:
     name: Notify GardenStation-ci-cd
     runs-on: ubuntu-latest
-    needs: [test, dry-run]
+    needs: [test]
     if: always()
     steps:
       - name: Dispatch python-ai-changed

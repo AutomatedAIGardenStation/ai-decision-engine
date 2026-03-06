@@ -6,7 +6,7 @@ from src.schemas.action_list import Action
 class PollinationEvaluator:
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
 
         if snapshot.system_config.maintenance_mode:
             return actions

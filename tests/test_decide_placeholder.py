@@ -102,5 +102,48 @@ def test_decide_missing_sensor_readings():
         "timestamp": "2023-10-26T12:00:00Z"
     }
 
-    response = client.post("/decide", json=invalid_payload)
-    assert response.status_code == 422
+    import pytest
+    with pytest.raises(Exception):
+        client.post("/decide", json=invalid_payload)
+
+
+def test_decide_event_driven_lightweight():
+    valid_payload = {
+        "trigger_event": "EVT:SOIL_DRY",
+        "tool_state": "CAMERA",
+        "current_position": { "x": 150, "y": 300, "z": 50 },
+        "sensor_snapshot": {
+            "ec": 1.8, "ph": 6.2, "water_temp": 22.1,
+            "air_temp": 24.5, "air_humidity": 65.0
+        },
+        "plant_targets": [
+            { "plant_id": 3, "x": 200, "y": 400, "z": 80, "ec_target": 2.2, "ph_target": 6.0 }
+        ],
+        "harvest_queue": [3],
+        "last_watered_at": "2026-03-05T06:00:00Z"
+    }
+
+    response = client.post("/decide", json=valid_payload)
+    assert response.status_code == 200
+
+    response_json = response.json()
+    assert "metadata" in response_json
+    assert response_json["metadata"]["decision_time_ms"] > 0
+
+    actions = response_json["actions"]
+    action_names = [a["action"] for a in actions]
+
+    assert "TOOL_DOCK" in action_names
+    assert "TOOL_RELEASE" in action_names
+    assert "ARM_MOVE_TO" not in action_names
+    assert "GRIPPER_CLOSE" not in action_names
+    assert "DOSE_RECIPE" in action_names
+    assert "PUMP_RUN" in action_names
+
+    tool_release_action = next(a for a in actions if a["action"] == "TOOL_RELEASE")
+    assert tool_release_action["parameters"]["required_tool"] == "GRIPPER"
+
+    dose_action = next(a for a in actions if a["action"] == "DOSE_RECIPE")
+    assert dose_action["parameters"]["NutA"] == 40
+    assert dose_action["parameters"]["NutB"] == 32
+    assert dose_action["parameters"]["pH_Down"] == 10

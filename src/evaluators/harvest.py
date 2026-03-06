@@ -5,9 +5,45 @@ from src.schemas.action_list import Action
 class HarvestEvaluator:
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
 
-        if snapshot.system_config.maintenance_mode:
+        if snapshot.trigger_event is not None:
+            # New lightweight event context logic
+            if snapshot.harvest_queue and len(snapshot.harvest_queue) > 0:
+                target_id = snapshot.harvest_queue[0]
+                # Find plant coordinates if available in plant_targets
+                x: float = 0.0
+                y: float = 0.0
+                z: float = 0.0
+                if snapshot.plant_targets:
+                    for pt in snapshot.plant_targets:
+                        if pt.plant_id == target_id:
+                            x, y, z = pt.x, pt.y, pt.z
+                            break
+
+                actions.append(
+                    Action(
+                        action="ARM_MOVE_TO",
+                        parameters={"x": x, "y": y, "z": z},
+                        reason=f"Moving to harvest plant {target_id}",
+                        priority="high"
+                    )
+                )
+                actions.append(
+                    Action(
+                        action="GRIPPER_CLOSE",
+                        parameters={},
+                        reason=f"Harvesting plant {target_id}",
+                        priority="high"
+                    )
+                )
+            return actions
+
+        # Legacy logic
+        if snapshot.system_config and snapshot.system_config.maintenance_mode:
+            return actions
+
+        if not snapshot.queue_state or not snapshot.ml_results:
             return actions
 
         active_harvest_id = snapshot.queue_state.active_harvest_id

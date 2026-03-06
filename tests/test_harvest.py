@@ -1,3 +1,4 @@
+from src.schemas.state_snapshot import PlantTarget
 from datetime import datetime, timezone
 from src.schemas.state_snapshot import StateSnapshot
 from src.evaluators.harvest import HarvestEvaluator
@@ -141,3 +142,20 @@ def test_active_harvest_unconfirmed_low_confidence():
     assert len(actions) == 1
     assert actions[0].action == "alert"
     assert actions[0].parameters["plant_id"] == 1
+
+def test_harvest_event_driven():
+    snapshot = StateSnapshot(
+        trigger_event="EVT:HARVEST",
+        harvest_queue=[3],
+        plant_targets=[
+            PlantTarget(plant_id=3, x=200, y=400, z=80, ec_target=2.2, ph_target=6.0)
+        ]
+    )
+    actions = HarvestEvaluator.evaluate(snapshot)
+
+    assert len(actions) == 2
+    assert actions[0].action == "ARM_MOVE_TO"
+    assert actions[0].parameters["x"] == 200
+    assert actions[0].parameters["y"] == 400
+    assert actions[0].parameters["z"] == 80
+    assert actions[1].action == "GRIPPER_CLOSE"

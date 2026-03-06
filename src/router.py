@@ -8,16 +8,28 @@ from src.evaluators.lighting import LightingEvaluator
 from src.evaluators.harvest import HarvestEvaluator
 from src.evaluators.pollination import PollinationEvaluator
 from src.evaluators.nutrient import NutrientEvaluator
+from src.evaluators.dosing import DosingEvaluator
+from src.evaluators.tool_change import ToolChangeEvaluator
+from src.decision.constraints import SafetyGates
 
 class DecisionRouter:
     def __init__(self):
-        self.evaluators = [
+        # Legacy evaluators
+        self.legacy_evaluators = [
             WateringEvaluator,
             ClimateEvaluator,
             LightingEvaluator,
             HarvestEvaluator,
             PollinationEvaluator,
             NutrientEvaluator
+        ]
+
+        # Lightweight event context evaluators
+        self.event_evaluators = [
+            WateringEvaluator,
+            DosingEvaluator,
+            ToolChangeEvaluator,
+            HarvestEvaluator
         ]
 
         # Priority map for deduplication
@@ -27,12 +39,26 @@ class DecisionRouter:
             "high": 3
         }
 
+        # For backwards compatibility with old tests accessing self.evaluators
+        self.evaluators = self.legacy_evaluators
+
     def evaluate(self, snapshot: StateSnapshot) -> ActionList:
         start_time = time.perf_counter()
 
         raw_actions: List[Action] = []
-        for evaluator in self.evaluators:
+
+        # Choose which set of evaluators to run based on the payload type
+        if snapshot is not None and snapshot.trigger_event is not None:
+            active_evaluators = self.event_evaluators
+        else:
+            active_evaluators = self.evaluators # typically self.legacy_evaluators
+
+        for evaluator in active_evaluators:
             raw_actions.extend(evaluator.evaluate(snapshot))
+
+        # Apply constraints if event-driven payload
+        if snapshot is not None and snapshot.trigger_event is not None:
+            raw_actions = SafetyGates.apply(raw_actions, snapshot)
 
         # Deduplication
         dedup_map: Dict[Tuple[str, str], Action] = {}
@@ -49,6 +75,12 @@ class DecisionRouter:
                 dedup_map[key] = action
 
         final_actions = list(dedup_map.values())
+
+        # Additional safety gates step ensuring TOOL_DOCK/RELEASE at front
+        if snapshot is not None and snapshot.trigger_event is not None:
+            tool_actions = [a for a in final_actions if a.action in ["TOOL_DOCK", "TOOL_RELEASE"]]
+            other_actions = [a for a in final_actions if a.action not in ["TOOL_DOCK", "TOOL_RELEASE"]]
+            final_actions = tool_actions + other_actions
 
         end_time = time.perf_counter()
         decision_time_ms = int((end_time - start_time) * 1000)

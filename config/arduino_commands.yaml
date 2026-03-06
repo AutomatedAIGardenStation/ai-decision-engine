@@ -10,3 +10,9 @@ adjust_light: "L1"
 notify_user: "N1"
 no_action: "NOP"
 move_to_zone: "M1"
+
+calibration:
+  NutA_ms_per_unit: 100
+  NutB_ms_per_unit: 80
+  pH_Up_ms_per_unit: 50
+  pH_Down_ms_per_unit: 50

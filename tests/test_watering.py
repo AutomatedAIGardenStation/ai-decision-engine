@@ -145,3 +145,13 @@ def test_out_of_bounds_handling():
     assert len(actions) == 1 # Only zone 0 evaluated, zone 1 skipped
     assert actions[0].action == "water"
     assert actions[0].parameters["zone"] == 0
+
+def test_watering_event_driven():
+    snapshot = StateSnapshot(
+        trigger_event="EVT:SOIL_DRY"
+    )
+
+    actions = WateringEvaluator.evaluate(snapshot)
+    assert len(actions) == 1
+    assert actions[0].action == "PUMP_RUN"
+    assert actions[0].parameters["ms"] == 3000

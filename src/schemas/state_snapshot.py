@@ -60,12 +60,45 @@ class History(BaseModel):
     last_watering: Dict[int, datetime] = Field(..., description="Mapping of zone/chamber ID to last watering timestamp")
     last_pollination: Optional[datetime] = Field(None, description="Timestamp of the last pollination event")
 
+class Position(BaseModel):
+    """3D position coordinates."""
+    x: float = Field(..., description="X coordinate")
+    y: float = Field(..., description="Y coordinate")
+    z: float = Field(..., description="Z coordinate")
+
+class SensorSnapshot(BaseModel):
+    """Lightweight sensor snapshot for event-driven decisions."""
+    ec: float = Field(..., description="Electrical conductivity in mS/cm")
+    ph: float = Field(..., description="pH level")
+    water_temp: float = Field(..., description="Water temperature in Celsius")
+    air_temp: float = Field(..., description="Air temperature in Celsius")
+    air_humidity: float = Field(..., description="Air humidity percentage")
+
+class PlantTarget(BaseModel):
+    """Plant targeting information for lightweight payload."""
+    plant_id: int = Field(..., description="Unique plant ID")
+    x: float = Field(..., description="X coordinate")
+    y: float = Field(..., description="Y coordinate")
+    z: float = Field(..., description="Z coordinate")
+    ec_target: float = Field(..., description="Target EC")
+    ph_target: float = Field(..., description="Target pH")
+
 class StateSnapshot(BaseModel):
     """Complete representation of the system state at a specific point in time."""
-    sensor_readings: SensorReadings
-    ml_results: List[MLResult]
-    plant_profiles: List[PlantProfile]
-    queue_state: QueueState
-    system_config: SystemConfig
-    history: History
-    timestamp: datetime = Field(..., description="Timestamp of this state snapshot")
+    # Legacy fields
+    sensor_readings: Optional[SensorReadings] = Field(None, description="Current sensor readings")
+    ml_results: Optional[List[MLResult]] = Field(None, description="Machine learning inference results")
+    plant_profiles: Optional[List[PlantProfile]] = Field(None, description="Target environment and configuration")
+    queue_state: Optional[QueueState] = Field(None, description="Current state of pending operations")
+    system_config: Optional[SystemConfig] = Field(None, description="Global system configuration")
+    history: Optional[History] = Field(None, description="Historical operation records")
+    timestamp: Optional[datetime] = Field(None, description="Timestamp of this state snapshot")
+
+    # Lightweight event context fields
+    trigger_event: Optional[str] = Field(None, description="Event that triggered this evaluation")
+    tool_state: Optional[str] = Field(None, description="Current active tool attached to the arm")
+    current_position: Optional[Position] = Field(None, description="Current position of the arm")
+    sensor_snapshot: Optional[SensorSnapshot] = Field(None, description="Sensor snapshot values")
+    plant_targets: Optional[List[PlantTarget]] = Field(None, description="Targets related to plants")
+    harvest_queue: Optional[List[int]] = Field(None, description="Queue of plant IDs to harvest")
+    last_watered_at: Optional[datetime] = Field(None, description="Timestamp when last watered")

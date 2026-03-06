@@ -8,7 +8,24 @@ class WateringEvaluator:
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
         actions = []
 
-        if snapshot.system_config.maintenance_mode:
+        if snapshot.trigger_event is not None:
+            # New lightweight event context logic
+            if snapshot.trigger_event == "EVT:SOIL_DRY":
+                actions.append(
+                    Action(
+                        action="PUMP_RUN",
+                        parameters={"ms": 3000},
+                        reason="Soil is dry, running pump",
+                        priority="high"
+                    )
+                )
+            return actions
+
+        # Legacy logic
+        if snapshot.system_config and snapshot.system_config.maintenance_mode:
+            return actions
+
+        if not snapshot.system_config or not snapshot.sensor_readings or not snapshot.plant_profiles or not snapshot.history:
             return actions
 
         zone_count = snapshot.system_config.zone_count

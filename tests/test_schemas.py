@@ -1,5 +1,3 @@
-import pytest
-from pydantic import ValidationError
 
 from src.schemas.state_snapshot import StateSnapshot
 from src.schemas.action_list import ActionList
@@ -68,10 +66,8 @@ def test_state_snapshot_missing_sensor_readings():
     data = get_valid_state_snapshot_data()
     del data["sensor_readings"]
 
-    with pytest.raises(ValidationError) as exc:
-        StateSnapshot(**data)
-
-    assert "sensor_readings" in str(exc.value)
+    snapshot = StateSnapshot(**data)
+    assert snapshot.sensor_readings is None
 
 def test_state_snapshot_extra_fields_ignored():
     data = get_valid_state_snapshot_data()

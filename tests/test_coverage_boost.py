@@ -36,8 +36,3 @@ def test_safety_gates_no_trigger():
 def test_main_startup():
     with TestClient(app):
         pass
-
-
-def test_writer_mock():
-    # just import and instantiate to improve coverage if needed, but it requires serial
-    pass

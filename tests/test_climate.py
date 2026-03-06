@@ -44,7 +44,7 @@ def test_temp_above_max():
 
     assert len(actions) == 1
     action = actions[0]
-    assert action.action == "fan_set"
+    assert action.action == "FAN_SET"
     assert action.parameters["pct"] == 100
     assert action.reason == "temp above max"
     assert action.priority == "high"
@@ -56,7 +56,7 @@ def test_temp_below_min():
     assert len(actions) == 2
 
     fan_action = actions[0]
-    assert fan_action.action == "fan_set"
+    assert fan_action.action == "FAN_SET"
     assert fan_action.parameters["pct"] == 0
     assert fan_action.reason == "temp below min"
     assert fan_action.priority == "high"
@@ -73,7 +73,7 @@ def test_proportional_cooling():
 
     assert len(actions) == 1
     action = actions[0]
-    assert action.action == "fan_set"
+    assert action.action == "FAN_SET"
     assert action.parameters["pct"] == 40
     assert action.reason == "proportional cooling"
     assert action.priority == "medium"

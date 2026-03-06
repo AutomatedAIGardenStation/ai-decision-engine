@@ -83,8 +83,8 @@ def test_action_list_valid():
     data = {
         "actions": [
             {
-                "action": "water",
-                "parameters": {"zone": 1, "duration_s": 30},
+                "action": "PUMP_RUN",
+                "parameters": {"zone": 1, "ms": 30000},
                 "reason": "Soil moisture below target",
                 "priority": "high"
             }
@@ -96,6 +96,6 @@ def test_action_list_valid():
     }
     action_list = ActionList(**data)
     assert len(action_list.actions) == 1
-    assert action_list.actions[0].action == "water"
-    assert action_list.actions[0].parameters["duration_s"] == 30
+    assert action_list.actions[0].action == "PUMP_RUN"
+    assert action_list.actions[0].parameters["ms"] == 30000
     assert action_list.metadata.decision_time_ms == 15

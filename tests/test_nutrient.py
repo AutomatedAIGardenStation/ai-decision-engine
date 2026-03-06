@@ -50,35 +50,37 @@ def test_maintenance_mode():
     assert len(actions) == 0
 
 def test_ec_below_target():
-    # target * 0.9 = 1.35. ec = 1.2 -> should add_concentrate
+    # target * 0.9 = 1.35. ec = 1.2 -> should DOSE_RECIPE
     snapshot = create_base_snapshot(ec=1.2, ph=6.0)
     actions = NutrientEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "add_concentrate"
-    assert actions[0].parameters == {"zone": 0}
+    assert actions[0].action == "DOSE_RECIPE"
+    assert actions[0].parameters == {"NutA": 500, "NutB": 500}
 
 def test_ec_above_target():
-    # target * 1.15 = 1.725. ec = 1.8 -> should dilute
+    # target * 1.15 = 1.725. ec = 1.8 -> should WATER_FLUSH
     snapshot = create_base_snapshot(ec=1.8, ph=6.0)
     actions = NutrientEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "dilute"
+    assert actions[0].action == "WATER_FLUSH"
     assert actions[0].parameters == {"zone": 0}
 
 def test_ph_below_min():
-    # min = 5.5. ph = 5.0 -> should add_base + alert
+    # min = 5.5. ph = 5.0 -> should DOSE_RECIPE + alert
     snapshot = create_base_snapshot(ec=1.5, ph=5.0)
     actions = NutrientEvaluator.evaluate(snapshot)
     assert len(actions) == 2
-    assert actions[0].action == "add_base"
+    assert actions[0].action == "DOSE_RECIPE"
+    assert actions[0].parameters == {"pH_Up": 500}
     assert actions[1].action == "alert"
 
 def test_ph_above_max():
-    # max = 6.5. ph = 7.0 -> should add_acid + alert
+    # max = 6.5. ph = 7.0 -> should DOSE_RECIPE + alert
     snapshot = create_base_snapshot(ec=1.5, ph=7.0)
     actions = NutrientEvaluator.evaluate(snapshot)
     assert len(actions) == 2
-    assert actions[0].action == "add_acid"
+    assert actions[0].action == "DOSE_RECIPE"
+    assert actions[0].parameters == {"pH_Down": 500}
     assert actions[1].action == "alert"
 
 def test_ec_and_ph_combined():
@@ -87,8 +89,8 @@ def test_ec_and_ph_combined():
     actions = NutrientEvaluator.evaluate(snapshot)
     assert len(actions) == 3
     actions_names = [a.action for a in actions]
-    assert "add_concentrate" in actions_names
-    assert "add_acid" in actions_names
+    # We expect 2 DOSE_RECIPE actions and 1 alert
+    assert actions_names.count("DOSE_RECIPE") == 2
     assert "alert" in actions_names
 
 def test_no_actions_needed():

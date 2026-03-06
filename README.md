@@ -1,6 +1,14 @@
 # Python AI – GardenStation
 
-Decision tree and control logic: decides what to do based on recognition results and sends commands to the Arduino (or simulation).
+Stateless Decision Engine. Receives a Lightweight Event Context Snapshot from the Backend, applies domain evaluators (Watering, EC/pH, Harvest, Climate, Pollination), and returns an Action Queue of firmware-primitive commands (Cartesian coordinates, valve timings, pump durations).
+
+## Module Contract
+
+| | |
+|---|---|
+| **Input** | Lightweight Event Context Snapshot (JSON via `POST /decide`) — sensors, vision results, plant profiles, cooldowns, tool state |
+| **Output** | Action Queue — array of firmware-primitive commands: `ARM_MOVE_TO`, `DOSE_RECIPE`, `PUMP_RUN`, `VALVE_SET`, `TOOL_DOCK`, `TOOL_RELEASE`, `WRIST_SET`, `GRIPPER_*`, `ARM_HOME`, `ESCALATE` |
+| **Constraint** | 100% stateless. No database access, no serial connections, no ML inference calls. |
 
 ## Setup
 
@@ -12,60 +20,63 @@ pip install -r requirements.txt
 
 ## Project structure
 
-- `config/` — `decision_rules.yaml` (optional override rules), `arduino_commands.yaml` (action → serial command)
+- `config/` — `decision_config.yaml` (thresholds, cooldowns), `arduino_commands.yaml` (action → firmware-primitive mapping)
 - `data/raw/`, `data/processed/`, `data/samples/` — datasets and samples; put training CSV in `data/processed/`
 - `models/` — `decision_tree.pkl` and `tree_metadata.json` (written by training script)
-- `src/` — `decision/` (features, tree, rules), `recognition/reader`, `arduino/writer`, `main.py`
-- `scripts/` — `train_tree.py` to train the tree
+- `src/decision/` — `engine.py` (main evaluator router), `evaluators/` (one per domain: watering, ec_ph, harvest, climate, pollination), `features.py`, `rules.py`, `tree.py`
+- `src/api/` — `server.py` (FastAPI, single `POST /decide` endpoint)
+- `src/recognition/` — `reader.py` (recognition result parser)
+- `src/arduino/` — `writer.py` (serial output, used in legacy CLI mode)
+- `scripts/` — `train_tree.py` to train the decision tree
 - `tests/` — unit tests and fixtures
 
 ## How it works
 
-1. Read recognition output (species, ripeness, confidence) from a JSON file or stub.
-2. Convert to a feature vector; optionally evaluate rules from `config/decision_rules.yaml`.
-3. If no rule matches, predict action with the decision tree.
-4. Map action to a serial command via `config/arduino_commands.yaml` and send to Arduino or a file (simulation).
+1. Backend sends a Lightweight Event Context Snapshot (sensors, vision results, plant profiles, cooldowns, tool state) to `POST /decide`.
+2. Engine routes the snapshot to domain evaluators (Watering, EC/pH, Harvest, Climate, Pollination).
+3. Each evaluator returns zero or more actions using firmware-primitive commands (e.g., `ARM_MOVE_TO`, `DOSE_RECIPE`, `PUMP_RUN`).
+4. Constraints gate (cooldowns, safety limits) filters the action list.
+5. Returns the Action Queue to the backend for execution.
 
 ## Usage
 
-Run the main controller (stub recognition, no serial by default; use `--dry-run` to avoid sending):
+Run the FastAPI decision server:
+
+```bash
+python -m src.api.server
+```
+
+Test with a snapshot:
+
+```bash
+curl -X POST http://localhost:8002/decide \
+  -H "Content-Type: application/json" \
+  -d @tests/fixtures/sample_snapshot.json
+```
+
+Legacy CLI mode (stub recognition, no server):
 
 ```bash
 python -m src.main --dry-run
 ```
 
-With a recognition JSON file and output to a file (simulation):
-
-```bash
-python -m src.main --recognition tests/fixtures/sample_recognition.json --port sim_out.txt --dry-run
-```
-
-With real serial port:
-
-```bash
-python -m src.main --port COM3 --recognition path/to/recognition.json
-```
-
 ## Training
 
-Create a CSV in `data/processed/` with columns: `species_encoded`, `ripeness`, `confidence`, `action`. Then:
+The decision tree is one possible evaluator implementation. To train it, create a CSV in `data/processed/` with columns: `species_encoded`, `ripeness`, `confidence`, `action`. Then:
 
 ```bash
 python scripts/train_tree.py --data-dir data/processed --output-dir models --csv decisions.csv
 ```
 
-This writes `models/decision_tree.pkl` and `models/tree_metadata.json`. Action labels must be one of: water, feed, pollinate, harvest, adjust_light, notify_user, no_action, move_to_zone.
+This writes `models/decision_tree.pkl` and `models/tree_metadata.json`.
 
 ## Config
 
-- **decision_rules.yaml** — Optional rules (e.g. if confidence < 0.5 then notify_user) evaluated before the tree.
-- **arduino_commands.yaml** — Maps each action to the string sent over serial. This is the canonical command set; arduino and simulation implement the same protocol. See project-info → Integration and Interfaces doc.
+- **decision_config.yaml** — Thresholds and cooldowns per domain evaluator.
+- **arduino_commands.yaml** — Maps action labels to firmware-primitive commands. Actions map to `ARM_MOVE_TO`, `PUMP_RUN`, `DOSE_RECIPE`, `VALVE_SET`, etc. — not legacy shortcodes.
 
 ## Tests
 
 ```bash
 python -m pytest tests/ -v
-# or
-python tests/test_features.py
-python tests/test_decision.py
 ```

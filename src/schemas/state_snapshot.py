@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class SensorReadings(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Current sensor readings for a zone/chamber."""
     temp: float = Field(..., description="Temperature in Celsius")
     humidity: float = Field(..., description="Relative humidity percentage")
@@ -12,6 +13,7 @@ class SensorReadings(BaseModel):
     tank_level_pct: float = Field(..., description="Water tank level percentage")
 
 class MLResult(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Machine learning inference results for a specific plant."""
     plant_id: int = Field(..., description="Unique identifier for the plant")
     ripeness: str = Field(..., description="Ripeness classification (e.g., 'unripe', 'ripe', 'overripe')")
@@ -19,12 +21,14 @@ class MLResult(BaseModel):
     confidence: float = Field(..., description="Confidence score of the ML prediction (0.0 to 1.0)")
 
 class PollinationWindow(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Configuration for a plant's pollination window."""
     start_hour: int = Field(..., description="Start hour of the pollination window (0-23)")
     end_hour: int = Field(..., description="End hour of the pollination window (0-23)")
     interval_days: int = Field(..., description="Minimum days between pollinations")
 
 class PlantProfile(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Target environment and configuration for a specific plant species/profile."""
     id: int = Field(..., description="Unique identifier for the plant profile")
     name: str = Field(..., description="Common name of the plant")
@@ -36,17 +40,20 @@ class PlantProfile(BaseModel):
     pollination_window: Optional[PollinationWindow] = Field(None, description="Time window and interval for pollination")
 
 class LightPeriod(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """A time period when grow lights are active."""
     start_hour: int = Field(..., description="Start hour of the light period (0-23)")
     end_hour: int = Field(..., description="End hour of the light period (0-23)")
     intensity_pct: int = Field(..., description="Light intensity percentage (0-100)")
 
 class QueueState(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Current state of pending operations."""
     harvest_pending_ids: List[int] = Field(..., description="List of plant IDs pending harvest")
     active_harvest_id: Optional[int] = Field(None, description="Plant ID currently being harvested")
 
 class SystemConfig(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Global system configuration and operational parameters."""
     maintenance_mode: bool = Field(..., description="Whether the system is in maintenance mode")
     zone_count: int = Field(..., description="Number of independent control zones")
@@ -56,17 +63,20 @@ class SystemConfig(BaseModel):
     light_schedule: List[LightPeriod] = Field(default_factory=list, description="Schedule for the lighting system")
 
 class History(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Historical operation records."""
     last_watering: Dict[int, datetime] = Field(..., description="Mapping of zone/chamber ID to last watering timestamp")
     last_pollination: Optional[datetime] = Field(None, description="Timestamp of the last pollination event")
 
 class Position(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """3D position coordinates."""
     x: float = Field(..., description="X coordinate")
     y: float = Field(..., description="Y coordinate")
     z: float = Field(..., description="Z coordinate")
 
 class SensorSnapshot(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Lightweight sensor snapshot for event-driven decisions."""
     ec: float = Field(..., description="Electrical conductivity in mS/cm")
     ph: float = Field(..., description="pH level")
@@ -75,6 +85,7 @@ class SensorSnapshot(BaseModel):
     air_humidity: float = Field(..., description="Air humidity percentage")
 
 class PlantTarget(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Plant targeting information for lightweight payload."""
     plant_id: int = Field(..., description="Unique plant ID")
     x: float = Field(..., description="X coordinate")
@@ -84,6 +95,7 @@ class PlantTarget(BaseModel):
     ph_target: float = Field(..., description="Target pH")
 
 class StateSnapshot(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     """Complete representation of the system state at a specific point in time."""
     # Legacy fields
     sensor_readings: Optional[SensorReadings] = Field(None, description="Current sensor readings")

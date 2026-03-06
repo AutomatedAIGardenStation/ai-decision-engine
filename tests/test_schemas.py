@@ -1,3 +1,5 @@
+import pytest
+from pydantic import ValidationError
 
 from src.schemas.state_snapshot import StateSnapshot
 from src.schemas.action_list import ActionList
@@ -69,12 +71,13 @@ def test_state_snapshot_missing_sensor_readings():
     snapshot = StateSnapshot(**data)
     assert snapshot.sensor_readings is None
 
-def test_state_snapshot_extra_fields_ignored():
-    data = get_valid_state_snapshot_data()
-    data["extra_unknown_field"] = "should be ignored"
 
-    snapshot = StateSnapshot(**data)
-    assert not hasattr(snapshot, "extra_unknown_field")
+def test_state_snapshot_extra_fields_forbidden():
+    data = get_valid_state_snapshot_data()
+    data["extra_unknown_field"] = "should be forbidden"
+
+    with pytest.raises(ValidationError):
+        StateSnapshot(**data)
 
 def test_action_list_valid():
     data = {

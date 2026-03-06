@@ -100,6 +100,9 @@ class DecisionRouter:
         if decision_time_ms <= 0:
             decision_time_ms = 1
 
+        # The decision engine is completely stateless and returns canonical actions.
+        # Direct serial side effects are explicitly forbidden here and reside in the CLI adapter only.
+
         return ActionList(
             actions=final_actions,
             metadata=DecisionMetadata(

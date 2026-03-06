@@ -19,6 +19,12 @@ pip install -r requirements.txt
 - `scripts/` — `train_tree.py` to train the tree
 - `tests/` — unit tests and fixtures
 
+## API Contract and Compatibility
+
+For backend integration, cross-repo compatibility, and complete details on the request/response payloads (`StateSnapshot` and `ActionList`), please see our [API Contracts Documentation](docs/api/contracts.md).
+
+The decision engine produces canonical firmware primitives directly (e.g., `PUMP_RUN`, `LIGHT_SET`, `DOSE_RECIPE`). The older mapped actions layer has been deprecated. The engine evaluates JSON payloads statelessly and returns side-effect free action plans.
+
 ## How it works
 
 1. Read recognition output (species, ripeness, confidence) from a JSON file or stub.

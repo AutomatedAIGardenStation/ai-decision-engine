@@ -1,0 +1,712 @@
+{
+  "$defs": {
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "description": "The name or type of the action to perform",
+          "title": "Action",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "description": "Key-value parameters for the action",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "reason": {
+          "description": "A short explanation of why this action was taken",
+          "title": "Reason",
+          "type": "string"
+        },
+        "priority": {
+          "description": "Execution priority level",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Priority",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "parameters",
+        "reason",
+        "priority"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "ActionList": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "description": "List of actions to execute",
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "metadata": {
+          "$ref": "#/$defs/DecisionMetadata",
+          "description": "Decision metadata"
+        }
+      },
+      "required": [
+        "actions",
+        "metadata"
+      ],
+      "title": "ActionList",
+      "type": "object"
+    },
+    "DecisionMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_time_ms": {
+          "description": "Time taken to make the decision in milliseconds",
+          "title": "Decision Time Ms",
+          "type": "integer"
+        },
+        "engine_version": {
+          "description": "Version of the decision engine",
+          "title": "Engine Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_time_ms",
+        "engine_version"
+      ],
+      "title": "DecisionMetadata",
+      "type": "object"
+    },
+    "History": {
+      "additionalProperties": false,
+      "properties": {
+        "last_watering": {
+          "additionalProperties": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": "Mapping of zone/chamber ID to last watering timestamp",
+          "title": "Last Watering",
+          "type": "object"
+        },
+        "last_pollination": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timestamp of the last pollination event",
+          "title": "Last Pollination"
+        }
+      },
+      "required": [
+        "last_watering"
+      ],
+      "title": "History",
+      "type": "object"
+    },
+    "LightPeriod": {
+      "additionalProperties": false,
+      "properties": {
+        "start_hour": {
+          "description": "Start hour of the light period (0-23)",
+          "title": "Start Hour",
+          "type": "integer"
+        },
+        "end_hour": {
+          "description": "End hour of the light period (0-23)",
+          "title": "End Hour",
+          "type": "integer"
+        },
+        "intensity_pct": {
+          "description": "Light intensity percentage (0-100)",
+          "title": "Intensity Pct",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_hour",
+        "end_hour",
+        "intensity_pct"
+      ],
+      "title": "LightPeriod",
+      "type": "object"
+    },
+    "MLResult": {
+      "additionalProperties": false,
+      "properties": {
+        "plant_id": {
+          "description": "Unique identifier for the plant",
+          "title": "Plant Id",
+          "type": "integer"
+        },
+        "ripeness": {
+          "description": "Ripeness classification (e.g., 'unripe', 'ripe', 'overripe')",
+          "title": "Ripeness",
+          "type": "string"
+        },
+        "disease": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Detected disease classification, if any",
+          "title": "Disease"
+        },
+        "confidence": {
+          "description": "Confidence score of the ML prediction (0.0 to 1.0)",
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "plant_id",
+        "ripeness",
+        "confidence"
+      ],
+      "title": "MLResult",
+      "type": "object"
+    },
+    "PlantProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the plant profile",
+          "title": "Id",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Common name of the plant",
+          "title": "Name",
+          "type": "string"
+        },
+        "species": {
+          "description": "Scientific or species name",
+          "title": "Species",
+          "type": "string"
+        },
+        "moisture_target": {
+          "description": "Target soil moisture percentage",
+          "title": "Moisture Target",
+          "type": "number"
+        },
+        "ec_target": {
+          "description": "Target electrical conductivity in mS/cm",
+          "title": "Ec Target",
+          "type": "number"
+        },
+        "ph_min": {
+          "description": "Minimum acceptable pH level",
+          "title": "Ph Min",
+          "type": "number"
+        },
+        "ph_max": {
+          "description": "Maximum acceptable pH level",
+          "title": "Ph Max",
+          "type": "number"
+        },
+        "pollination_window": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PollinationWindow"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Time window and interval for pollination"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "species",
+        "moisture_target",
+        "ec_target",
+        "ph_min",
+        "ph_max"
+      ],
+      "title": "PlantProfile",
+      "type": "object"
+    },
+    "PlantTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "plant_id": {
+          "description": "Unique plant ID",
+          "title": "Plant Id",
+          "type": "integer"
+        },
+        "x": {
+          "description": "X coordinate",
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "Y coordinate",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Z coordinate",
+          "title": "Z",
+          "type": "number"
+        },
+        "ec_target": {
+          "description": "Target EC",
+          "title": "Ec Target",
+          "type": "number"
+        },
+        "ph_target": {
+          "description": "Target pH",
+          "title": "Ph Target",
+          "type": "number"
+        }
+      },
+      "required": [
+        "plant_id",
+        "x",
+        "y",
+        "z",
+        "ec_target",
+        "ph_target"
+      ],
+      "title": "PlantTarget",
+      "type": "object"
+    },
+    "PollinationWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "start_hour": {
+          "description": "Start hour of the pollination window (0-23)",
+          "title": "Start Hour",
+          "type": "integer"
+        },
+        "end_hour": {
+          "description": "End hour of the pollination window (0-23)",
+          "title": "End Hour",
+          "type": "integer"
+        },
+        "interval_days": {
+          "description": "Minimum days between pollinations",
+          "title": "Interval Days",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_hour",
+        "end_hour",
+        "interval_days"
+      ],
+      "title": "PollinationWindow",
+      "type": "object"
+    },
+    "Position": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "description": "X coordinate",
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "Y coordinate",
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "description": "Z coordinate",
+          "title": "Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "Position",
+      "type": "object"
+    },
+    "QueueState": {
+      "additionalProperties": false,
+      "properties": {
+        "harvest_pending_ids": {
+          "description": "List of plant IDs pending harvest",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Harvest Pending Ids",
+          "type": "array"
+        },
+        "active_harvest_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plant ID currently being harvested",
+          "title": "Active Harvest Id"
+        }
+      },
+      "required": [
+        "harvest_pending_ids"
+      ],
+      "title": "QueueState",
+      "type": "object"
+    },
+    "SensorReadings": {
+      "additionalProperties": false,
+      "properties": {
+        "temp": {
+          "description": "Temperature in Celsius",
+          "title": "Temp",
+          "type": "number"
+        },
+        "humidity": {
+          "description": "Relative humidity percentage",
+          "title": "Humidity",
+          "type": "number"
+        },
+        "ph": {
+          "description": "pH level of the nutrient solution",
+          "title": "Ph",
+          "type": "number"
+        },
+        "ec": {
+          "description": "Electrical conductivity in mS/cm",
+          "title": "Ec",
+          "type": "number"
+        },
+        "soil_moisture": {
+          "description": "List of soil moisture percentages from multiple sensors",
+          "items": {
+            "type": "number"
+          },
+          "title": "Soil Moisture",
+          "type": "array"
+        },
+        "tank_level_pct": {
+          "description": "Water tank level percentage",
+          "title": "Tank Level Pct",
+          "type": "number"
+        }
+      },
+      "required": [
+        "temp",
+        "humidity",
+        "ph",
+        "ec",
+        "soil_moisture",
+        "tank_level_pct"
+      ],
+      "title": "SensorReadings",
+      "type": "object"
+    },
+    "SensorSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "ec": {
+          "description": "Electrical conductivity in mS/cm",
+          "title": "Ec",
+          "type": "number"
+        },
+        "ph": {
+          "description": "pH level",
+          "title": "Ph",
+          "type": "number"
+        },
+        "water_temp": {
+          "description": "Water temperature in Celsius",
+          "title": "Water Temp",
+          "type": "number"
+        },
+        "air_temp": {
+          "description": "Air temperature in Celsius",
+          "title": "Air Temp",
+          "type": "number"
+        },
+        "air_humidity": {
+          "description": "Air humidity percentage",
+          "title": "Air Humidity",
+          "type": "number"
+        }
+      },
+      "required": [
+        "ec",
+        "ph",
+        "water_temp",
+        "air_temp",
+        "air_humidity"
+      ],
+      "title": "SensorSnapshot",
+      "type": "object"
+    },
+    "StateSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "sensor_readings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SensorReadings"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Current sensor readings"
+        },
+        "ml_results": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/MLResult"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Machine learning inference results",
+          "title": "Ml Results"
+        },
+        "plant_profiles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/PlantProfile"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Target environment and configuration",
+          "title": "Plant Profiles"
+        },
+        "queue_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueueState"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Current state of pending operations"
+        },
+        "system_config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Global system configuration"
+        },
+        "history": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/History"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Historical operation records"
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timestamp of this state snapshot",
+          "title": "Timestamp"
+        },
+        "trigger_event": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Event that triggered this evaluation",
+          "title": "Trigger Event"
+        },
+        "tool_state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Current active tool attached to the arm",
+          "title": "Tool State"
+        },
+        "current_position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Position"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Current position of the arm"
+        },
+        "sensor_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SensorSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sensor snapshot values"
+        },
+        "plant_targets": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/PlantTarget"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Targets related to plants",
+          "title": "Plant Targets"
+        },
+        "harvest_queue": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Queue of plant IDs to harvest",
+          "title": "Harvest Queue"
+        },
+        "last_watered_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timestamp when last watered",
+          "title": "Last Watered At"
+        }
+      },
+      "title": "StateSnapshot",
+      "type": "object"
+    },
+    "SystemConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "maintenance_mode": {
+          "description": "Whether the system is in maintenance mode",
+          "title": "Maintenance Mode",
+          "type": "boolean"
+        },
+        "zone_count": {
+          "description": "Number of independent control zones",
+          "title": "Zone Count",
+          "type": "integer"
+        },
+        "max_pump_time_s": {
+          "description": "Maximum allowed pump run time in seconds",
+          "title": "Max Pump Time S",
+          "type": "integer"
+        },
+        "temp_min": {
+          "default": 18.0,
+          "description": "Minimum allowed temperature",
+          "title": "Temp Min",
+          "type": "number"
+        },
+        "temp_max": {
+          "default": 30.0,
+          "description": "Maximum allowed temperature",
+          "title": "Temp Max",
+          "type": "number"
+        },
+        "light_schedule": {
+          "description": "Schedule for the lighting system",
+          "items": {
+            "$ref": "#/$defs/LightPeriod"
+          },
+          "title": "Light Schedule",
+          "type": "array"
+        }
+      },
+      "required": [
+        "maintenance_mode",
+        "zone_count",
+        "max_pump_time_s"
+      ],
+      "title": "SystemConfig",
+      "type": "object"
+    }
+  },
+  "title": "GardenStation API Contracts"
+}

@@ -28,22 +28,22 @@ pip install -r requirements.txt
 
 ## Usage
 
-Run the main controller (stub recognition, no serial by default; use `--dry-run` to avoid sending):
+Run the API server (no serial by default):
 
 ```bash
-python -m src.api.server --dry-run
+python -m src.api.server
 ```
 
-With a recognition JSON file and output to a file (simulation):
+Or use the optional CLI adapter with a recognition JSON file and output to a file (simulation):
 
 ```bash
-python -m src.api.server --recognition tests/fixtures/sample_recognition.json --port sim_out.txt --dry-run
+python -m src.cli --recognition tests/fixtures/sample_recognition.json --port sim_out.txt --dry-run
 ```
 
 With real serial port:
 
 ```bash
-python -m src.api.server --port COM3 --recognition path/to/recognition.json
+python -m src.cli --port COM3 --recognition path/to/recognition.json
 ```
 
 ## Training

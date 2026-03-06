@@ -76,6 +76,18 @@ class DecisionRouter:
 
         final_actions = list(dedup_map.values())
 
+        # Sort actions deterministically:
+        # 1. High priority first (descending by priority map value)
+        # 2. Alphabetically by action name
+        # 3. Alphabetically by string representation of sorted parameters
+        final_actions.sort(
+            key=lambda a: (
+                -self.priority_map.get(a.priority, 0),
+                a.action,
+                str(tuple(sorted(a.parameters.items())))
+            )
+        )
+
         # Additional safety gates step ensuring TOOL_DOCK/RELEASE at front
         if snapshot is not None and snapshot.trigger_event is not None:
             tool_actions = [a for a in final_actions if a.action in ["TOOL_DOCK", "TOOL_RELEASE"]]

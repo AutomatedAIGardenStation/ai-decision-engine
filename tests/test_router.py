@@ -124,3 +124,43 @@ def test_deduplication():
     # The higher priority should win
     assert actions[0].priority == "high"
     assert actions[0].reason == "b"
+
+def test_deterministic_sorting():
+    router = DecisionRouter()
+
+    class DummyEvaluator:
+        @staticmethod
+        def evaluate(snap):
+            from src.schemas.action_list import Action
+            return [
+                Action(action="water", parameters={"zone": 2}, reason="a", priority="low"),
+                Action(action="alert", parameters={"msg": "test"}, reason="b", priority="high"),
+                Action(action="water", parameters={"zone": 1}, reason="c", priority="low"),
+                Action(action="light_set", parameters={"pct": 50}, reason="d", priority="medium"),
+                Action(action="alert", parameters={"msg": "another"}, reason="e", priority="high")
+            ]
+
+    router.evaluators = [DummyEvaluator]
+
+    action_list = router.evaluate(None)
+    actions = action_list.actions
+
+    assert len(actions) == 5
+
+    # High priority first
+    assert actions[0].action == "alert"
+    assert actions[0].parameters == {"msg": "another"} # 'another' comes before 'test' alphabetically in parameters string
+
+    assert actions[1].action == "alert"
+    assert actions[1].parameters == {"msg": "test"}
+
+    # Medium priority
+    assert actions[2].action == "light_set"
+    assert actions[2].priority == "medium"
+
+    # Low priority
+    assert actions[3].action == "water"
+    assert actions[3].parameters == {"zone": 1} # 1 before 2
+
+    assert actions[4].action == "water"
+    assert actions[4].parameters == {"zone": 2}

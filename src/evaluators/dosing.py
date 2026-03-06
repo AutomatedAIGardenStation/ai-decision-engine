@@ -1,4 +1,4 @@
-import yaml
+import yaml  # type: ignore
 import os
 from typing import List
 from src.schemas.state_snapshot import StateSnapshot
@@ -19,7 +19,7 @@ class DosingEvaluator:
 
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
         if snapshot.trigger_event is None:
             return actions
 

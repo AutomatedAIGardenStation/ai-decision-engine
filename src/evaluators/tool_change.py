@@ -5,7 +5,7 @@ from src.schemas.action_list import Action
 class ToolChangeEvaluator:
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
         if snapshot.trigger_event is None:
             return actions
 

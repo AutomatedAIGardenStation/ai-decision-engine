@@ -4,7 +4,7 @@ Evaluate optional override rules from config before falling back to the tree.
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore
 
 # Feature key in recognition dict (and in rules) -> index in feature vector for numeric compare.
 FEATURE_TO_INDEX: dict[str, int] = {

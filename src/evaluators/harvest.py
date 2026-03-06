@@ -5,14 +5,16 @@ from src.schemas.action_list import Action
 class HarvestEvaluator:
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
 
         if snapshot.trigger_event is not None:
             # New lightweight event context logic
             if snapshot.harvest_queue and len(snapshot.harvest_queue) > 0:
                 target_id = snapshot.harvest_queue[0]
                 # Find plant coordinates if available in plant_targets
-                x, y, z = 0, 0, 0
+                x: float = 0.0
+                y: float = 0.0
+                z: float = 0.0
                 if snapshot.plant_targets:
                     for pt in snapshot.plant_targets:
                         if pt.plant_id == target_id:

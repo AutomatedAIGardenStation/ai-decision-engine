@@ -6,7 +6,7 @@ from src.schemas.action_list import Action
 class WateringEvaluator:
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:
-        actions = []
+        actions: List[Action] = []
 
         if snapshot.trigger_event is not None:
             # New lightweight event context logic

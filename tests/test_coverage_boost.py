@@ -4,7 +4,7 @@ from src.evaluators.tool_change import ToolChangeEvaluator
 from src.decision.constraints import SafetyGates
 from src.schemas.state_snapshot import StateSnapshot
 from src.schemas.action_list import Action
-from src.main import app
+from src.api.server import app
 from fastapi.testclient import TestClient
 
 def test_dosing_zero_plant_targets():

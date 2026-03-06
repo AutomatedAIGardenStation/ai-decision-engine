@@ -15,7 +15,7 @@ pip install -r requirements.txt
 - `config/` — `decision_rules.yaml` (optional override rules), `arduino_commands.yaml` (action → serial command)
 - `data/raw/`, `data/processed/`, `data/samples/` — datasets and samples; put training CSV in `data/processed/`
 - `models/` — `decision_tree.pkl` and `tree_metadata.json` (written by training script)
-- `src/` — `decision/` (features, tree, rules), `recognition/reader`, `arduino/writer`, `main.py`
+- `src/` — `decision/` (features, tree, rules), `recognition/reader`, `arduino/writer`, `api/server.py`
 - `scripts/` — `train_tree.py` to train the tree
 - `tests/` — unit tests and fixtures
 
@@ -31,19 +31,19 @@ pip install -r requirements.txt
 Run the main controller (stub recognition, no serial by default; use `--dry-run` to avoid sending):
 
 ```bash
-python -m src.main --dry-run
+python -m src.api.server --dry-run
 ```
 
 With a recognition JSON file and output to a file (simulation):
 
 ```bash
-python -m src.main --recognition tests/fixtures/sample_recognition.json --port sim_out.txt --dry-run
+python -m src.api.server --recognition tests/fixtures/sample_recognition.json --port sim_out.txt --dry-run
 ```
 
 With real serial port:
 
 ```bash
-python -m src.main --port COM3 --recognition path/to/recognition.json
+python -m src.api.server --port COM3 --recognition path/to/recognition.json
 ```
 
 ## Training

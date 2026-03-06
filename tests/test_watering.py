@@ -72,9 +72,9 @@ def test_below_threshold_water():
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "water"
+    assert actions[0].action == "PUMP_RUN"
     assert actions[0].parameters["zone"] == 0
-    assert actions[0].parameters["duration_s"] == 10
+    assert actions[0].parameters["ms"] == 10000
 
 def test_above_threshold_stop():
     # target 50, 1.1 * 50 = 55.0. Moisture is 60.0.
@@ -82,8 +82,8 @@ def test_above_threshold_stop():
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "stop_watering"
-    assert actions[0].parameters["zone"] == 0
+    assert actions[0].action == "WATER_STOP"
+    assert "zone" not in actions[0].parameters
 
 def test_cooldown_active_no_action():
     # target 50, moisture 40 (< 42.5), but watered 15 mins ago
@@ -107,10 +107,10 @@ def test_multiple_zones():
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 2
-    assert actions[0].action == "water"
+    assert actions[0].action == "PUMP_RUN"
     assert actions[0].parameters["zone"] == 0
-    assert actions[1].action == "stop_watering"
-    assert actions[1].parameters["zone"] == 1
+    assert actions[1].action == "WATER_STOP"
+    assert "zone" not in actions[1].parameters
 
 def test_on_target_no_action():
     # target 50, moisture 50
@@ -125,8 +125,8 @@ def test_duration_capped_at_60s():
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "water"
-    assert actions[0].parameters["duration_s"] == 60
+    assert actions[0].action == "PUMP_RUN"
+    assert actions[0].parameters["ms"] == 60000
 
 def test_missing_last_watering_time():
     # target 50, moisture 40. Last watering time not present for zone 0.
@@ -135,15 +135,15 @@ def test_missing_last_watering_time():
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1
-    assert actions[0].action == "water"
-    assert actions[0].parameters["duration_s"] == 10
+    assert actions[0].action == "PUMP_RUN"
+    assert actions[0].parameters["ms"] == 10000
 
 def test_out_of_bounds_handling():
     data = create_base_snapshot(zone_count=2, soil_moisture=[40.0], moisture_target=50.0) # Only 1 moisture reading
     snapshot = StateSnapshot(**data)
     actions = WateringEvaluator.evaluate(snapshot)
     assert len(actions) == 1 # Only zone 0 evaluated, zone 1 skipped
-    assert actions[0].action == "water"
+    assert actions[0].action == "PUMP_RUN"
     assert actions[0].parameters["zone"] == 0
 
 def test_watering_event_driven():

@@ -17,7 +17,7 @@ class ClimateEvaluator:
         if temp > temp_max:
             actions.append(
                 Action(
-                    action="fan_set",
+                    action="FAN_SET",
                     parameters={"pct": 100},
                     reason="temp above max",
                     priority="high"
@@ -26,7 +26,7 @@ class ClimateEvaluator:
         elif temp < temp_min:
             actions.append(
                 Action(
-                    action="fan_set",
+                    action="FAN_SET",
                     parameters={"pct": 0},
                     reason="temp below min",
                     priority="high"
@@ -44,7 +44,7 @@ class ClimateEvaluator:
             pct = int(((temp - temp_min) / (temp_max - temp_min)) * 80)
             actions.append(
                 Action(
-                    action="fan_set",
+                    action="FAN_SET",
                     parameters={"pct": pct},
                     reason="proportional cooling",
                     priority="medium"

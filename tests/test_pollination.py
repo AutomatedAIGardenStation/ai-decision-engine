@@ -77,9 +77,12 @@ def test_pollination_in_window_no_history():
     )
     snapshot = StateSnapshot(**data)
     actions = PollinationEvaluator.evaluate(snapshot)
-    assert len(actions) == 1
-    assert actions[0].action == "pollinate"
-    assert actions[0].parameters["plant_id"] == 1
+    assert len(actions) == 3
+    assert actions[0].action == "TOOL_RELEASE"
+    assert actions[0].parameters["required_tool"] == "POLLINATOR"
+    assert actions[1].action == "ARM_MOVE_TO"
+    assert actions[1].parameters["plant_id"] == 1
+    assert actions[2].action == "GRIPPER_CLOSE"
 
 def test_pollination_out_of_window_early():
     # current hour 7, window 8-12
@@ -121,6 +124,9 @@ def test_pollination_interval_elapsed():
     )
     snapshot = StateSnapshot(**data)
     actions = PollinationEvaluator.evaluate(snapshot)
-    assert len(actions) == 1
-    assert actions[0].action == "pollinate"
-    assert actions[0].parameters["plant_id"] == 1
+    assert len(actions) == 3
+    assert actions[0].action == "TOOL_RELEASE"
+    assert actions[0].parameters["required_tool"] == "POLLINATOR"
+    assert actions[1].action == "ARM_MOVE_TO"
+    assert actions[1].parameters["plant_id"] == 1
+    assert actions[2].action == "GRIPPER_CLOSE"

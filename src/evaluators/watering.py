@@ -62,8 +62,8 @@ class WateringEvaluator:
                 duration_s = min(60, max(1, int(deficit)))
                 actions.append(
                     Action(
-                        action="water",
-                        parameters={"zone": zone, "duration_s": duration_s},
+                        action="PUMP_RUN",
+                        parameters={"zone": zone, "ms": duration_s * 1000},
                         reason=f"Moisture {moisture}% below target {target}%",
                         priority="high"
                     )
@@ -71,8 +71,8 @@ class WateringEvaluator:
             elif moisture > target * 1.1:
                 actions.append(
                     Action(
-                        action="stop_watering",
-                        parameters={"zone": zone},
+                        action="WATER_STOP",
+                        parameters={},
                         reason=f"Moisture {moisture}% above target {target}%",
                         priority="high"
                     )

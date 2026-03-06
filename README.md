@@ -12,10 +12,10 @@ pip install -r requirements.txt
 
 ## Project structure
 
-- `config/` — `decision_rules.yaml` (optional override rules), `arduino_commands.yaml` (action → serial command)
+- `config/` — `decision_rules.yaml` (optional override rules)
 - `data/raw/`, `data/processed/`, `data/samples/` — datasets and samples; put training CSV in `data/processed/`
 - `models/` — `decision_tree.pkl` and `tree_metadata.json` (written by training script)
-- `src/` — `decision/` (features, tree, rules), `recognition/reader`, `arduino/writer`, `api/server.py`
+- `src/` — `decision/` (features, tree, rules), `recognition/reader`, `api/server.py`
 - `scripts/` — `train_tree.py` to train the tree
 - `tests/` — unit tests and fixtures
 
@@ -24,7 +24,7 @@ pip install -r requirements.txt
 1. Read recognition output (species, ripeness, confidence) from a JSON file or stub.
 2. Convert to a feature vector; optionally evaluate rules from `config/decision_rules.yaml`.
 3. If no rule matches, predict action with the decision tree.
-4. Map action to a serial command via `config/arduino_commands.yaml` and send to Arduino or a file (simulation).
+4. Output the canonical action parameters.
 
 ## Usage
 
@@ -59,7 +59,6 @@ This writes `models/decision_tree.pkl` and `models/tree_metadata.json`. Action l
 ## Config
 
 - **decision_rules.yaml** — Optional rules (e.g. if confidence < 0.5 then notify_user) evaluated before the tree.
-- **arduino_commands.yaml** — Maps each action to the string sent over serial. This is the canonical command set; arduino and simulation implement the same protocol. See project-info → Integration and Interfaces doc.
 
 ## Tests
 

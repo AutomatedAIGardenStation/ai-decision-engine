@@ -1,5 +1,3 @@
-import yaml  # type: ignore
-import os
 from typing import List
 from src.schemas.state_snapshot import StateSnapshot
 from src.schemas.action_list import Action
@@ -7,15 +5,12 @@ from src.schemas.action_list import Action
 class DosingEvaluator:
     @staticmethod
     def _load_calibration() -> dict:
-        config_path = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'config', 'arduino_commands.yaml'
-        )
-        try:
-            with open(config_path, 'r') as f:
-                config = yaml.safe_load(f)
-                return config.get('calibration', {})
-        except Exception:
-            return {}
+        return {
+            'NutA_ms_per_unit': 100,
+            'NutB_ms_per_unit': 80,
+            'pH_Up_ms_per_unit': 50,
+            'pH_Down_ms_per_unit': 50
+        }
 
     @staticmethod
     def evaluate(snapshot: StateSnapshot) -> List[Action]:

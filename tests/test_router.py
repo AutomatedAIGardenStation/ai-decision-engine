@@ -79,23 +79,24 @@ def test_router_end_to_end():
     action_names = [a.action for a in actions]
 
     # 1. Watering: soil_moisture=10.0 < target*0.85
-    assert "water" in action_names
+    assert "PUMP_RUN" in action_names
 
-    # 2. Climate: temp=32.0 > max(30.0) -> max cooling -> fan_set pct=100
-    assert "fan_set" in action_names
+    # 2. Climate: temp=32.0 > max(30.0) -> max cooling -> FAN_SET pct=100
+    assert "FAN_SET" in action_names
 
-    # 3. Lighting: light_set pct=0
-    assert "light_set" in action_names
+    # 3. Lighting: LIGHT_SET pct=0
+    assert "LIGHT_SET" in action_names
 
     # 4. Harvest: MLResult is ripe -> enqueue_harvest
     assert "enqueue_harvest" in action_names
 
     # 5. Pollination: window matches, interval passed
-    assert "pollinate" in action_names
+    assert "TOOL_RELEASE" in action_names
+    assert "ARM_MOVE_TO" in action_names
+    assert "GRIPPER_CLOSE" in action_names
 
-    # 6. Nutrient: EC is 1.0 (low) -> add_concentrate, pH is 7.5 (high) -> add_acid, alert
-    assert "add_concentrate" in action_names
-    assert "add_acid" in action_names
+    # 6. Nutrient: EC is 1.0 (low) -> DOSE_RECIPE, pH is 7.5 (high) -> DOSE_RECIPE, alert
+    assert "DOSE_RECIPE" in action_names
     assert "alert" in action_names
 
 def test_deduplication():
@@ -133,10 +134,10 @@ def test_deterministic_sorting():
         def evaluate(snap):
             from src.schemas.action_list import Action
             return [
-                Action(action="water", parameters={"zone": 2}, reason="a", priority="low"),
+                Action(action="PUMP_RUN", parameters={"zone": 2}, reason="a", priority="low"),
                 Action(action="alert", parameters={"msg": "test"}, reason="b", priority="high"),
-                Action(action="water", parameters={"zone": 1}, reason="c", priority="low"),
-                Action(action="light_set", parameters={"pct": 50}, reason="d", priority="medium"),
+                Action(action="PUMP_RUN", parameters={"zone": 1}, reason="c", priority="low"),
+                Action(action="LIGHT_SET", parameters={"pct": 50}, reason="d", priority="medium"),
                 Action(action="alert", parameters={"msg": "another"}, reason="e", priority="high")
             ]
 
@@ -155,12 +156,12 @@ def test_deterministic_sorting():
     assert actions[1].parameters == {"msg": "test"}
 
     # Medium priority
-    assert actions[2].action == "light_set"
+    assert actions[2].action == "LIGHT_SET"
     assert actions[2].priority == "medium"
 
     # Low priority
-    assert actions[3].action == "water"
+    assert actions[3].action == "PUMP_RUN"
     assert actions[3].parameters == {"zone": 1} # 1 before 2
 
-    assert actions[4].action == "water"
+    assert actions[4].action == "PUMP_RUN"
     assert actions[4].parameters == {"zone": 2}

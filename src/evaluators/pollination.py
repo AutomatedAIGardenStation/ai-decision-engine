@@ -26,8 +26,24 @@ class PollinationEvaluator:
                     if last_pollination is None or (snapshot.timestamp - last_pollination) > timedelta(days=interval):
                         actions.append(
                             Action(
-                                action="pollinate",
+                                action="TOOL_RELEASE",
+                                parameters={"required_tool": "POLLINATOR"},
+                                reason="Within pollination window and interval has elapsed",
+                                priority="medium"
+                            )
+                        )
+                        actions.append(
+                            Action(
+                                action="ARM_MOVE_TO",
                                 parameters={"plant_id": profile.id},
+                                reason="Within pollination window and interval has elapsed",
+                                priority="medium"
+                            )
+                        )
+                        actions.append(
+                            Action(
+                                action="GRIPPER_CLOSE",
+                                parameters={},
                                 reason="Within pollination window and interval has elapsed",
                                 priority="medium"
                             )

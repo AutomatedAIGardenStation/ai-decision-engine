@@ -23,8 +23,8 @@ class NutrientEvaluator:
             if ec < profile.ec_target * 0.9:
                 actions.append(
                     Action(
-                        action="add_concentrate",
-                        parameters={"zone": zone},
+                        action="DOSE_RECIPE",
+                        parameters={"NutA": 500, "NutB": 500},
                         reason="EC below target",
                         priority="high"
                     )
@@ -32,7 +32,7 @@ class NutrientEvaluator:
             elif ec > profile.ec_target * 1.15:
                 actions.append(
                     Action(
-                        action="dilute",
+                        action="WATER_FLUSH",
                         parameters={"zone": zone},
                         reason="EC above target",
                         priority="high"
@@ -42,8 +42,8 @@ class NutrientEvaluator:
             if ph < profile.ph_min:
                 actions.append(
                     Action(
-                        action="add_base",
-                        parameters={"zone": zone},
+                        action="DOSE_RECIPE",
+                        parameters={"pH_Up": 500},
                         reason="pH below minimum",
                         priority="high"
                     )
@@ -59,8 +59,8 @@ class NutrientEvaluator:
             elif ph > profile.ph_max:
                 actions.append(
                     Action(
-                        action="add_acid",
-                        parameters={"zone": zone},
+                        action="DOSE_RECIPE",
+                        parameters={"pH_Down": 500},
                         reason="pH above maximum",
                         priority="high"
                     )

@@ -48,7 +48,7 @@ def test_within_schedule():
 
     assert len(actions) == 3
     for i, action in enumerate(actions):
-        assert action.action == "light_set"
+        assert action.action == "LIGHT_SET"
         assert action.parameters["ch"] == i
         assert action.parameters["pct"] == 80
         assert action.reason == "scheduled lighting"
@@ -60,21 +60,24 @@ def test_outside_schedule():
     snapshot = create_snapshot(hour=22, schedule=schedule, zone_count=3)
     actions = LightingEvaluator.evaluate(snapshot)
 
-    assert len(actions) == 1
-    action = actions[0]
-    assert action.action == "light_set"
-    assert "ch" not in action.parameters
-    assert action.parameters["pct"] == 0
-    assert action.reason == "outside light schedule"
-    assert action.priority == "low"
+    assert len(actions) == 3
+    for i, action in enumerate(actions):
+        assert action.action == "LIGHT_SET"
+        assert action.parameters["ch"] == i
+        assert action.parameters["pct"] == 0
+        assert action.reason == "outside light schedule"
+        assert action.priority == "low"
 
 def test_empty_schedule():
     schedule = []
     snapshot = create_snapshot(hour=12, schedule=schedule, zone_count=2)
     actions = LightingEvaluator.evaluate(snapshot)
 
-    assert len(actions) == 1
-    assert actions[0].parameters["pct"] == 0
+    assert len(actions) == 2
+    for i, action in enumerate(actions):
+        assert action.action == "LIGHT_SET"
+        assert action.parameters["pct"] == 0
+        assert action.parameters["ch"] == i
 
 def test_schedule_edge_cases():
     schedule = [{"start_hour": 8, "end_hour": 20, "intensity_pct": 100}]
@@ -83,10 +86,12 @@ def test_schedule_edge_cases():
     snapshot = create_snapshot(hour=8, schedule=schedule, zone_count=1)
     actions = LightingEvaluator.evaluate(snapshot)
     assert len(actions) == 1
+    assert actions[0].action == "LIGHT_SET"
     assert actions[0].parameters["pct"] == 100
 
     # Exactly on end_hour should be inactive
     snapshot = create_snapshot(hour=20, schedule=schedule, zone_count=1)
     actions = LightingEvaluator.evaluate(snapshot)
     assert len(actions) == 1
+    assert actions[0].action == "LIGHT_SET"
     assert actions[0].parameters["pct"] == 0

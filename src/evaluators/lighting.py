@@ -24,21 +24,22 @@ class LightingEvaluator:
             for ch in range(zone_count):
                 actions.append(
                     Action(
-                        action="light_set",
+                        action="LIGHT_SET",
                         parameters={"ch": ch, "pct": active_period.intensity_pct},
                         reason="scheduled lighting",
                         priority="low"
                     )
                 )
         else:
-            # Issue specifically states: "If no active period: add light_set {"pct": 0} for all channels"
-            actions.append(
-                Action(
-                    action="light_set",
-                    parameters={"pct": 0},
-                    reason="outside light schedule",
-                    priority="low"
+            # If no active period: add LIGHT_SET {"ch": ch, "pct": 0} for all channels
+            for ch in range(zone_count):
+                actions.append(
+                    Action(
+                        action="LIGHT_SET",
+                        parameters={"ch": ch, "pct": 0},
+                        reason="outside light schedule",
+                        priority="low"
+                    )
                 )
-            )
 
         return actions

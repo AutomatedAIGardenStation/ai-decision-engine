@@ -69,13 +69,13 @@ def test_decide_placeholder():
     action_names = [a["action"] for a in actions]
 
     # 24.5 is in range [18.0, 30.0], proportional cooling: pct = ((24.5 - 18.0) / 12.0) * 80 = 43.33 -> 43
-    assert "fan_set" in action_names
+    assert "FAN_SET" in action_names
     for a in actions:
-        if a["action"] == "fan_set":
+        if a["action"] == "FAN_SET":
             assert a["parameters"]["pct"] == 43
 
     # No light schedule provided -> outside schedule -> pct 0
-    assert "light_set" in action_names
+    assert "LIGHT_SET" in action_names
 
     # EC target is 1.6. EC = 1.5. Target * 0.9 = 1.44. Target * 1.15 = 1.84. 1.5 is in range.
     # pH min is 5.5, max is 6.5. pH = 6.0. In range.

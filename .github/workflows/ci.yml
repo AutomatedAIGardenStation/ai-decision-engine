@@ -83,10 +83,10 @@ jobs:
 
   # ── Notify ci-cd repo ──────────────────────────────────────────────────────
   notify-ci-cd:
-    name: Notify GardenStation-ci-cd
+    name: Notify pipeline-orchestrator
     runs-on: ubuntu-latest
     needs: [test, dry-run]
-    if: always()
+    if: github.event_name == 'pull_request' && always()
     steps:
       - name: Dispatch python-ai-changed
         uses: actions/github-script@v7
